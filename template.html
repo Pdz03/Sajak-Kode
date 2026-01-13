@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sajak Kode - CSSBattle Solutions</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Playfair Display (Sajak) & Fira Code (Kode) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        'sajak-dark': '#0f172a',    // Slate 900
+                        'sajak-card': '#1e293b',    // Slate 800
+                        'sajak-accent': '#2dd4bf',  // Teal 400
+                        'sajak-gold': '#fbbf24',    // Amber 400
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2dd4bf;
+        }
+        
+        .code-preview {
+            counter-reset: line;
+        }
+        .code-preview code {
+            display: block;
+            line-height: 1.5rem;
+        }
+    </style>
+</head>
+<body class="bg-sajak-dark text-slate-300 font-sans min-h-screen flex flex-col">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 bg-sajak-dark/95 backdrop-blur border-b border-slate-700 shadow-lg">
+        <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+            <!-- Logo Area -->
+            <a href="#" onclick="renderHome()" class="flex items-center gap-3 group">
+                <!-- Placeholder Logo Image (Ganti src ini dengan gambar logo aslimu) -->
+                <div class="relative w-10 h-10 flex items-center justify-center bg-sajak-card rounded-lg border border-slate-600 group-hover:border-sajak-accent transition-colors overflow-hidden">
+                   <!-- Icon Kode SVG sebagai placeholder logo -->
+                   <i class="fa-solid fa-feather-pointed text-sajak-accent text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-serif text-xl font-bold text-white tracking-wide">Sajak<span class="text-sajak-accent font-mono">Kode</span></h1>
+                </div>
+            </a>
+
+            <!-- Desktop Menu -->
+            <nav class="hidden md:flex gap-6 text-sm font-medium">
+                <a href="#" onclick="renderHome()" class="hover:text-sajak-accent transition-colors">Beranda</a>
+                <a href="#" class="hover:text-sajak-accent transition-colors">Daily Targets</a>
+                <a href="#" class="hover:text-sajak-accent transition-colors">Tentang</a>
+                <a href="#" class="px-4 py-2 bg-sajak-accent text-sajak-dark rounded-full font-bold hover:bg-teal-300 transition-transform active:scale-95">
+                    Mulai Coding
+                </a>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-2xl text-slate-300 hover:text-white">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT (Dynamic) -->
+    <main id="app" class="flex-grow container mx-auto px-4 py-8">
+        <!-- Content will be injected here by JavaScript -->
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-sajak-card border-t border-slate-700 mt-auto">
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fa-solid fa-feather-pointed text-sajak-accent"></i>
+                        <span class="font-serif font-bold text-white text-lg">SajakKode</span>
+                    </div>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        Tempat di mana logika pemrograman bertemu dengan keindahan visual. Kumpulan solusi CSSBattle harian untuk mengasah kreativitasmu.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-white font-bold mb-4">Navigasi</h3>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" onclick="renderHome()" class="hover:text-sajak-accent">Beranda</a></li>
+                        <li><a href="#" class="hover:text-sajak-accent">Top Solutions</a></li>
+                        <li><a href="#" class="hover:text-sajak-accent">Blog</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-white font-bold mb-4">Ikuti Kami</h3>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-8 h-8 rounded bg-slate-700 flex items-center justify-center hover:bg-sajak-accent hover:text-sajak-dark transition-colors"><i class="fa-brands fa-github"></i></a>
+                        <a href="#" class="w-8 h-8 rounded bg-slate-700 flex items-center justify-center hover:bg-blue-400 hover:text-white transition-colors"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="#" class="w-8 h-8 rounded bg-slate-700 flex items-center justify-center hover:bg-pink-500 hover:text-white transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center border-t border-slate-700 pt-6 text-sm text-slate-500">
+                &copy; 2026 Sajak Kode. Created by Fendi.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA DUMMY (Database Simulasi) ---
+        const targets = [
+            {
+                id: 1,
+                date: "11 Jan 2026",
+                title: "Target #1: Simply Square",
+                description: "Tantangan dasar untuk memahami positioning absolute dan centering.",
+                imageUrl: "https://via.placeholder.com/400x300/2dd4bf/0f172a?text=Target+1", 
+                code: `<div></div>
+<style>
+  body { 
+    background: #5D3A3A; 
+    display: grid;
+    place-items: center;
+  }
+  div {
+    width: 200px;
+    height: 200px;
+    background: #b5e0ba;
+  }
+</style>`,
+                comments: [
+                    { user: "DevSinta", text: "Wah, solusinya bersih banget! Thanks." },
+                    { user: "CodeMaster", text: "Bisa lebih pendek lagi pakai margin: auto loh." }
+                ]
+            },
+            {
+                id: 2,
+                date: "10 Jan 2026",
+                title: "Target #2: Carrom",
+                description: "Menggunakan box-shadow untuk membuat empat kotak di sudut tanpa menambah div.",
+                imageUrl: "https://via.placeholder.com/400x300/fbbf24/0f172a?text=Target+2",
+                code: `<div></div>
+<style>
+  body {
+    background: #62306D;
+    margin: 0;
+  }
+  div {
+    width: 50px;
+    height: 50px;
+    background: #FEDE5D;
+    box-shadow: 
+      50px 50px 0 #FEDE5D,
+      250px 50px 0 #FEDE5D,
+      50px 150px 0 #FEDE5D,
+      250px 150px 0 #FEDE5D;
+  }
+</style>`,
+                comments: []
+            },
+            {
+                id: 3,
+                date: "09 Jan 2026",
+                title: "Target #3: Push Button",
+                description: "Ilusi 3D sederhana menggunakan lingkaran bertumpuk.",
+                imageUrl: "https://via.placeholder.com/400x300/f472b6/0f172a?text=Target+3",
+                code: `<div></div>
+<style>
+  body {
+    background: #6592CF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  div {
+    width: 150px;
+    height: 150px;
+    background: #243D83;
+    border-radius: 50%;
+    border: 50px solid #6592CF;
+    box-shadow: 0 0 0 50px #243D83;
+  }
+</style>`,
+                comments: [{ user: "Fendi", text: "Keren, warna birunya pas banget." }]
+            }
+        ];
+
+        // --- RENDER FUNCTIONS ---
+
+        const app = document.getElementById('app');
+
+        // Fungsi Render Halaman Depan (List)
+        function renderHome() {
+            window.scrollTo(0, 0);
+            let html = `
+                <!-- Hero Section -->
+                <div class="text-center py-12 mb-10">
+                    <h2 class="text-4xl md:text-5xl font-serif font-bold text-white mb-4">
+                        Dari Logika menjadi <span class="text-transparent bg-clip-text bg-gradient-to-r from-sajak-accent to-blue-500 italic">Rangkaian Kata</span>
+                    </h2>
+                    <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+                        Kumpulan solusi CSSBattle harian. Pelajari struktur, efisiensi, dan seni dalam menulis kode CSS.
+                    </p>
+                </div>
+
+                <!-- Search / Filter (Visual Only) -->
+                <div class="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
+                    <h3 class="text-xl font-bold text-white"><i class="fa-solid fa-list-check mr-2"></i>Daily Targets</h3>
+                    <div class="relative">
+                        <input type="text" placeholder="Cari target..." class="bg-sajak-card border border-slate-600 rounded-full py-2 px-4 text-sm focus:outline-none focus:border-sajak-accent text-white w-48 md:w-64">
+                        <i class="fa-solid fa-search absolute right-3 top-2.5 text-slate-500 text-xs"></i>
+                    </div>
+                </div>
+
+                <!-- Grid Card Container -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            `;
+
+            targets.forEach(item => {
+                html += `
+                    <div onclick="renderDetail(${item.id})" class="bg-sajak-card border border-slate-700 rounded-xl overflow-hidden hover:shadow-[0_0_20px_rgba(45,212,191,0.2)] hover:border-sajak-accent transition-all cursor-pointer group">
+                        <div class="relative overflow-hidden h-48 bg-slate-900 flex items-center justify-center">
+                            <!-- Image Placeholder -->
+                            <img src="${item.imageUrl}" alt="${item.title}" class="object-cover w-full h-full opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-transform duration-500">
+                            
+                            <!-- Date Badge -->
+                            <div class="absolute top-3 left-3 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs font-mono text-sajak-accent border border-sajak-accent/30">
+                                ${item.date}
+                            </div>
+                        </div>
+                        
+                        <div class="p-5">
+                            <h4 class="text-white font-bold text-lg mb-2 group-hover:text-sajak-accent transition-colors">${item.title}</h4>
+                            <p class="text-slate-400 text-sm line-clamp-2 mb-4">${item.description}</p>
+                            
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-700/50">
+                                <span class="text-xs text-slate-500 font-mono"><i class="fa-solid fa-code mr-1"></i>CSS Solution</span>
+                                <span class="text-sajak-accent text-sm font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                    Lihat Kode <i class="fa-solid fa-arrow-right text-xs"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`; // Close grid
+            app.innerHTML = html;
+        }
+
+        // Fungsi Render Halaman Detail
+        function renderDetail(id) {
+            window.scrollTo(0, 0);
+            const data = targets.find(t => t.id === id);
+            
+            if(!data) return;
+
+            // Generate Comment HTML
+            let commentsHtml = '';
+            data.comments.forEach(c => {
+                commentsHtml += `
+                    <div class="flex gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                            ${c.user.charAt(0)}
+                        </div>
+                        <div class="bg-slate-900/50 p-3 rounded-lg border border-slate-700 w-full">
+                            <div class="text-xs text-sajak-accent font-bold mb-1">${c.user}</div>
+                            <p class="text-sm text-slate-300">${c.text}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const detailHtml = `
+                <!-- Breadcrumb & Back -->
+                <button onclick="renderHome()" class="flex items-center text-slate-400 hover:text-white mb-6 transition-colors group">
+                    <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center mr-2 group-hover:bg-sajak-accent group-hover:text-sajak-dark">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </div>
+                    <span class="font-medium">Kembali ke Daftar</span>
+                </button>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Kolom Kiri: Preview & Info -->
+                    <div class="space-y-6">
+                        <div class="bg-sajak-card p-2 rounded-xl border border-slate-700 shadow-xl">
+                             <div class="aspect-square bg-slate-900 rounded-lg overflow-hidden relative group">
+                                <img src="${data.imageUrl}" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span class="text-white font-mono bg-black/50 px-3 py-1 rounded border border-white/20">Preview Output</span>
+                                </div>
+                             </div>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-sajak-accent font-mono text-sm border border-sajak-accent/30 px-2 py-0.5 rounded">${data.date}</span>
+                            </div>
+                            <h1 class="text-3xl font-serif font-bold text-white mb-4">${data.title}</h1>
+                            <p class="text-slate-400 leading-relaxed">${data.description}</p>
+                        </div>
+                    </div>
+
+                    <!-- Kolom Kanan: Source Code -->
+                    <div class="flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-2 px-1">
+                            <span class="text-slate-300 font-mono text-sm"><i class="fa-brands fa-css3-alt mr-2 text-blue-500"></i>Solution Code</span>
+                            <button onclick="copyCode(this, '${data.id}')" class="text-xs bg-slate-700 hover:bg-sajak-accent hover:text-sajak-dark text-white px-3 py-1.5 rounded transition-colors flex items-center gap-2">
+                                <i class="fa-regular fa-copy"></i> Copy Code
+                            </button>
+                        </div>
+                        
+                        <div class="relative group flex-grow">
+                            <textarea id="code-${data.id}" class="hidden">${data.code}</textarea>
+                            <div class="w-full h-full min-h-[400px] bg-[#1e1e1e] p-4 rounded-xl border border-slate-700 font-mono text-sm overflow-auto text-green-400 shadow-inner">
+                                <pre>${data.code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+                            </div>
+                        </div>
+
+                        <!-- Comment Section -->
+                        <div class="mt-8 bg-sajak-card p-6 rounded-xl border border-slate-700">
+                            <h3 class="text-white font-bold mb-4 flex items-center gap-2">
+                                <i class="fa-regular fa-comments"></i> Diskusi
+                            </h3>
+                            
+                            <div class="max-h-60 overflow-y-auto mb-4 pr-2 custom-scrollbar">
+                                ${commentsHtml || '<p class="text-slate-500 text-sm italic">Belum ada komentar.</p>'}
+                            </div>
+
+                            <form onsubmit="submitComment(event)" class="relative">
+                                <input type="text" placeholder="Tulis komentar..." class="w-full bg-slate-900 border border-slate-600 rounded-lg py-3 px-4 text-sm text-white focus:outline-none focus:border-sajak-accent pr-12">
+                                <button type="submit" class="absolute right-2 top-2 w-8 h-8 flex items-center justify-center text-sajak-accent hover:bg-sajak-accent hover:text-sajak-dark rounded transition-colors">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            app.innerHTML = detailHtml;
+        }
+
+        // --- UTILITIES ---
+
+        function copyCode(btn, id) {
+            const code = document.getElementById(`code-${id}`).value;
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> Copied!`;
+                btn.classList.add('bg-green-600', 'text-white');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('bg-green-600');
+                }, 2000);
+            });
+        }
+
+        function submitComment(e) {
+            e.preventDefault();
+            alert("Fitur komentar ini hanya demo (dummy). Nanti bisa dikoneksikan ke database backend-mu!");
+            e.target.reset();
+        }
+
+        // Initialize
+        renderHome();
+
+    </script>
+</body>
+</html>

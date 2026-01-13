@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Sajak Kode</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter"],
+              serif: ["Playfair Display"],
+              mono: ["Fira Code"],
+            },
+            colors: {
+              "sajak-dark": "#0f172a",
+              "sajak-card": "#1e293b",
+              "sajak-accent": "#2dd4bf",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-sajak-dark text-slate-300 font-sans flex flex-col min-h-screen"
+  >
+    <script src="layout.js"></script>
+
+    <script>
+      // Cek Keamanan Dulu
+      const token = localStorage.getItem("adminToken");
+      if (!token) window.location.href = "/login.html";
+
+      window.onload = function () {
+        const app = document.getElementById("app");
+
+        app.innerHTML = `
+            <div class="max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
+                    <h2 class="text-2xl font-serif font-bold text-white">Dashboard Penulis</h2>
+                    <button id="logoutBtn" class="text-xs font-mono text-red-400 hover:text-red-300 border border-red-900 bg-red-900/20 px-4 py-2 rounded transition">LOGOUT</button>
+                </div>
+
+                <form id="adminForm" class="bg-sajak-card p-6 rounded-xl border border-slate-700 space-y-6">
+                    
+                    <div class="grid grid-cols-4 gap-6">
+                        <div class="col-span-1">
+                            <label class="block text-xs font-mono text-sajak-accent mb-2">TARGET #</label>
+                            <input type="number" id="targetNumber" class="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded text-white focus:border-sajak-accent focus:outline-none" placeholder="1" required>
+                        </div>
+                        <div class="col-span-3">
+                            <label class="block text-xs font-mono text-sajak-accent mb-2">JUDUL TARGET</label>
+                            <input type="text" id="title" class="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded text-white focus:border-sajak-accent focus:outline-none" placeholder="Simply Square" required>
+                        </div>
+                    </div>
+
+                    <div>
+    <label class="block text-xs font-mono text-sajak-accent mb-2">UPLOAD GAMBAR TARGET</label>
+    <div class="flex gap-2">
+        <input type="file" id="imageInput" accept="image/*" class="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded text-slate-400 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-sajak-accent file:text-sajak-dark hover:file:bg-teal-300">
+        
+        <input type="hidden" id="finalImageUrl">
+    </div>
+    <img id="preview" class="h-20 mt-2 rounded border border-slate-700 hidden object-cover">
+</div>
+
+                    <div>
+                        <label class="block text-xs font-mono text-sajak-accent mb-2">DESKRIPSI SINGKAT</label>
+                        <textarea id="description" class="w-full h-20 px-4 py-3 bg-slate-900 border border-slate-600 rounded text-slate-300 font-sans text-sm focus:border-sajak-accent focus:outline-none" placeholder="Ceritakan sedikit tentang teknik yang dipakai..." required></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-mono text-emerald-400 mb-2">&lt;SOURCE_CODE /&gt; (Include &lt;style&gt;)</label>
+                        <textarea id="code" class="w-full h-64 px-4 py-3 bg-slate-900 border border-slate-600 rounded text-emerald-300 font-mono text-sm focus:border-emerald-400 focus:outline-none" placeholder="<div></div><style>...</style>" required></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-slate-700 hover:bg-sajak-accent hover:text-sajak-dark text-white font-bold py-3 rounded-lg transition-all border border-slate-600 hover:border-sajak-accent">
+                        <i class="fa-solid fa-save mr-2"></i> SIMPAN SOLUSI
+                    </button>
+                </form>
+                <div class="mt-10">
+    <h3 class="text-xl font-bold text-white mb-4">Daftar Solusi Aktif</h3>
+    <div id="solutionsList" class="space-y-4">
+        </div>
+</div>
+            </div>
+        `;
+
+        let editModeId = null;
+
+        // 1. Fungsi Fetch & Render Daftar
+        async function loadSolutions() {
+          const res = await fetch("/api/solutions");
+          const data = await res.json();
+          const list = document.getElementById("solutionsList");
+          list.innerHTML = "";
+
+          data.forEach((item) => {
+            list.innerHTML += `
+            <div class="bg-slate-800 p-4 rounded border border-slate-600 flex justify-between items-center">
+                <div>
+                    <span class="text-sajak-accent font-bold">#${item.targetNumber}</span>
+                    <span class="text-white ml-2">${item.title}</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="editItem('${item._id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-500">Edit</button>
+                    <button onclick="deleteItem('${item._id}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-500">Hapus</button>
+                </div>
+            </div>
+        `;
+          });
+        }
+
+        // 2. Fungsi Hapus
+        window.deleteItem = async (id) => {
+          if (!confirm("Yakin mau hapus?")) return;
+          await fetch(`/api/solutions/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: token },
+          });
+          loadSolutions(); // Refresh daftar
+        };
+
+        // 3. Fungsi Persiapan Edit (Isi Form)
+        window.editItem = async (id) => {
+          // Ambil data detail (bisa fetch ulang atau cari dari array yang ada)
+          const res = await fetch("/api/solutions");
+          const data = await res.json();
+          const item = data.find((i) => i._id === id);
+
+          // Isi Form
+          document.getElementById("targetNumber").value = item.targetNumber;
+          document.getElementById("title").value = item.title;
+          document.getElementById("finalImageUrl").value = item.image; // URL gambar
+          document.getElementById("description").value = item.description;
+          document.getElementById("code").value = item.code;
+
+          // Tampilkan preview gambar
+          const img = document.getElementById("preview");
+          img.src = item.image;
+          img.classList.remove("hidden");
+
+          // Ubah Mode Tombol
+          editModeId = id;
+          const btn = document
+            .getElementById("adminForm")
+            .querySelector("button");
+          btn.innerHTML = "🔄 UPDATE SOLUSI";
+          btn.classList.replace("bg-slate-700", "bg-blue-600");
+
+          // Scroll ke atas
+          window.scrollTo(0, 0);
+        };
+
+        // Logic Logout (Tetap sama)
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+          localStorage.removeItem("adminToken");
+          window.location.href = "/";
+        });
+
+        // LOGIC PREVIEW GAMBAR SAAT DIPILIH
+        document
+          .getElementById("imageInput")
+          .addEventListener("change", function (e) {
+            const file = e.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                const img = document.getElementById("preview");
+                img.src = e.target.result;
+                img.classList.remove("hidden");
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+
+        // LOGIC SUBMIT BARU (Upload dulu -> Baru Simpan Data)
+        document
+          .getElementById("adminForm")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const btn = this.querySelector("button");
+            const originalText = btn.innerHTML;
+            btn.innerHTML =
+              '<i class="fa-solid fa-spinner fa-spin"></i> Mengupload...';
+            btn.disabled = true;
+
+            try {
+              // 1. PROSES UPLOAD GAMBAR (Jika ada file dipilih)
+              const fileInput = document.getElementById("imageInput");
+              let imageUrl = document.getElementById("finalImageUrl").value; // Default kosong/lama
+
+              if (fileInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append("imageFile", fileInput.files[0]);
+
+                const uploadRes = await fetch("/api/upload", {
+                  method: "POST",
+                  body: formData, // Header Content-Type otomatis diatur browser
+                });
+
+                if (!uploadRes.ok) throw new Error("Gagal upload gambar");
+
+                const uploadData = await uploadRes.json();
+                imageUrl = uploadData.url; // Kita dapat URL: /images/uploads/123-nama.png
+              } else {
+                // Jika tidak upload file, pastikan user isi manual atau error
+                if (!imageUrl) {
+                  // Opsional: Bolehkan pakai URL eksternal jika mau, atau throw error
+                  // throw new Error('Harap pilih gambar!');
+                }
+              }
+
+              // 2. SIMPAN DATA SOLUSI KE DATABASE
+              const data = {
+                targetNumber: document.getElementById("targetNumber").value,
+                title: document.getElementById("title").value,
+                image: imageUrl, // Pakai URL hasil upload tadi
+                description: document.getElementById("description").value,
+                code: document.getElementById("code").value,
+              };
+
+              const method = editModeId ? "PUT" : "POST";
+              const url = editModeId
+                ? `/api/solutions/${editModeId}`
+                : "/api/solutions";
+
+              const saveRes = await fetch(url, {
+                method: method,
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: token,
+                },
+                body: JSON.stringify(data),
+              });
+
+              if (saveRes.ok) {
+                alert("✅ Berhasil!");
+                this.reset();
+                document.getElementById("preview").classList.add("hidden");
+                loadSolutions(); // Refresh daftar
+
+                // Reset Mode ke Input Baru
+                editModeId = null;
+                const btn = this.querySelector("button");
+                btn.innerHTML = "💾 SIMPAN SOLUSI";
+                btn.classList.replace("bg-blue-600", "bg-slate-700");
+              }
+            } catch (error) {
+              console.error(error);
+              alert("❌ Error: " + error.message);
+            } finally {
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+            }
+          });
+
+          loadSolutions();
+      };
+    </script>
+  </body>
+</html>

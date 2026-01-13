@@ -1,0 +1,49 @@
+<body>
+    <div></div>
+</body>
+<style>
+    body {
+    background: #F7CB71;
+    margin: 0;
+  }
+
+  div {
+    position: fixed;
+    left: 40px; 
+    top: 130px; 
+    
+    width: 160px;
+    height: 40px; 
+    background: #7C3219;
+    
+    transform: rotate(45deg);
+    
+    box-shadow: 113px -113px 0 #7C3219;
+  }
+
+  div::before {
+    content: '';
+    position: absolute;
+    width: 160px;
+    height: 40px;
+    background: #7C3219;
+
+    transform: rotate(90deg);
+    
+    box-shadow: -113px -113px 0 #7C3219;
+  }
+
+  div::after {
+    content: '';
+    position: absolute;
+    
+    width: 40px; 
+    height: 40px; 
+    background: #F7CB71; 
+    
+    left: 60px; 
+    top: 0;
+    
+    box-shadow: 113px -113px 0 #F7CB71;
+  }
+</style>

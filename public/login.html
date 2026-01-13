@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pintu Rahasia - Sajak Kode</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter"],
+              serif: ["Playfair Display"],
+              mono: ["Fira Code"],
+            },
+            colors: {
+              "sajak-dark": "#0f172a",
+              "sajak-card": "#1e293b",
+              "sajak-accent": "#2dd4bf",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-sajak-dark text-slate-300 font-sans flex flex-col min-h-screen"
+  >
+    <script src="layout.js"></script>
+
+    <script>
+      // Kita timpa isi <main> setelah layout dimuat
+      window.onload = function () {
+        const app = document.getElementById("app");
+        app.className =
+          "flex-grow flex items-center justify-center min-h-[80vh]"; // Center vertically
+
+        app.innerHTML = `
+                <div class="w-full max-w-md p-8 bg-sajak-card border border-slate-700 rounded-2xl shadow-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sajak-accent to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                    
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl font-serif font-bold text-white mb-2">Restricted Access</h2>
+                        <p class="text-slate-400 text-sm font-mono">Masukkan frasa sandi untuk melanjutkan.</p>
+                    </div>
+
+                    <form id="loginForm" class="space-y-6">
+                        <div>
+                            <input type="password" id="password" placeholder="Passphrase..." 
+                                class="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-sajak-accent focus:ring-1 focus:ring-sajak-accent font-mono text-center tracking-widest transition-all" required>
+                        </div>
+                        <button type="submit" 
+                            class="w-full bg-sajak-accent text-sajak-dark font-bold py-3 rounded-lg hover:bg-teal-300 transition-all transform active:scale-95 shadow-lg shadow-teal-900/20">
+                            Buka Gerbang
+                        </button>
+                    </form>
+                </div>
+            `;
+
+        // Logic Login
+        document
+          .getElementById("loginForm")
+          .addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const password = document.getElementById("password").value;
+            const btn = e.target.querySelector("button");
+
+            btn.innerHTML =
+              '<i class="fa-solid fa-circle-notch fa-spin"></i> Memverifikasi...';
+
+            const res = await fetch("/api/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ password }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+              localStorage.setItem("adminToken", data.token);
+              window.location.href = "/admin.html";
+            } else {
+              alert("⛔ Akses Ditolak: " + data.message);
+              btn.innerHTML = "Buka Gerbang";
+            }
+          });
+      };
+    </script>
+  </body>
+</html>

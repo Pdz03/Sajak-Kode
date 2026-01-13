@@ -36,7 +36,7 @@ const footerHTML = `
                     <p class="text-sm text-slate-400">Tempat logika bertemu estetika.</p>
                 </div>
                 <div class="text-sm text-slate-500">
-                    &copy; 2026 Sajak Kode. <span class="text-slate-400">Code is Poetry.</span>
+                    &copy; 2026 Sajak Kode. <span class="text-slate-400">Dari Logika menjadi Rangkaian Kata.</span>
                 </div>
             </div>
         </div>

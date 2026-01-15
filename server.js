@@ -17,10 +17,45 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("✅ Terkoneksi ke MongoDB"))
-  .catch((err) => console.error("❌ Gagal koneksi DB:", err));
+// --- KONEKSI DATABASE OPTIMIZED FOR VERCEL ---
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false, // Wajib false di serverless biar gak nunggu lama kalau putus
+    };
+
+    cached.promise = mongoose.connect(process.env.MONGODB_URI, opts).then((mongoose) => {
+      console.log("✅ Terkoneksi ke MongoDB (Baru)");
+      return mongoose;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    console.error("❌ Gagal koneksi DB:", e);
+    throw e;
+  }
+
+  return cached.conn;
+}
+
+// Panggil fungsi connect di setiap request agar aman
+app.use(async (req, res, next) => {
+    await connectDB();
+    next();
+});
 
 // 1. UPDATE SCHEMA LENGKAP
 const solutionSchema = new mongoose.Schema({
@@ -194,6 +229,11 @@ app.get("/api/solutions", async (req, res) => {
 app.get('/pinturahasia', (req, res) => {
     // Kita kirim file login.html, tapi URL di browser tetap '/pinturahasia'
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/bebasbersajak', (req, res) => {
+    // Kita kirim file login.html, tapi URL di browser tetap '/pinturahasia'
+    res.sendFile(path.join(__dirname, 'public', 'playground.html'));
 });
 
 app.get(/.*/, (req, res) => {

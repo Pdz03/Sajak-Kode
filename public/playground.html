@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanvas Kode - Sajak Kode</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter'], mono: ['Fira Code'], serif: ['Playfair Display'] },
+                    colors: { 'sajak-dark': '#0f172a', 'sajak-card': '#1e293b', 'sajak-accent': '#2dd4bf' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .CodeMirror { height: 100%; font-family: 'Fira Code', monospace; font-size: 13px; }
+        /* Resizer Handle Style */
+        #resizer {
+            width: 4px;
+            background: transparent;
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            cursor: col-resize;
+            z-index: 10;
+            transition: background 0.2s;
+        }
+        #resizer:hover, #left-col.resizing #resizer { background: #2dd4bf; }
+        /* Console Output Style */
+        .console-log { border-bottom: 1px solid #334155; padding: 4px 8px; font-family: 'Fira Code', monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all;}
+        .console-error { color: #ef4444; background: #451a1a; }
+    </style>
+</head>
+
+<body class="bg-sajak-dark text-slate-300 font-sans flex flex-col md:h-screen md:overflow-hidden h-auto overflow-auto">
+
+    <header class="h-14 bg-sajak-card border-b border-slate-700 flex items-center justify-between px-4 shrink-0 sticky top-0 z-30 shadow-lg">
+        <div class="flex items-center gap-3">
+            <a href="/" class="flex items-center gap-3 group">
+
+                <div class="relative w-10 h-10 flex items-center justify-center bg-sajak-card rounded-lg border border-slate-600 group-hover:border-sajak-accent transition-colors overflow-hidden p-1">
+                   <img src="/images/logo.png" alt="Logo Sajak Kode" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <h1 class="font-serif text-xl font-bold text-white tracking-wide">Sajak<span class="text-sajak-accent font-mono">Kode</span></h1>
+                </div>
+            </a>
+        </div>
+        <div class="flex gap-3 items-center">
+             <span id="save-status" class="text-xs text-slate-500 font-mono hidden md:inline-block"><i class="fa-solid fa-check-circle text-sajak-accent"></i> Saved</span>
+            <button onclick="runCode(true)" class="bg-sajak-accent text-sajak-dark px-5 py-1.5 rounded-full font-bold text-sm hover:bg-teal-300 transition flex items-center gap-2 shadow-[0_0_15px_rgba(45,212,191,0.3)] active:scale-95">
+                <i class="fa-solid fa-play"></i> <span class="hidden sm:inline">RUN</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-grow flex flex-col md:flex-row md:h-[calc(100vh-3.5rem)] h-auto relative" id="main-container">
+        
+        <div id="left-col" class="w-full md:w-[33.33%] flex flex-col border-b md:border-b-0 border-slate-700 bg-[#282a36] relative min-w-[200px]">
+            
+            <div id="resizer" class="hidden md:block"></div>
+
+            <div class="h-[250px] md:h-auto md:flex-1 flex flex-col min-h-0 border-b border-slate-700 relative">
+                <div class="bg-slate-800/50 px-3 py-1 text-xs font-mono font-bold text-orange-400 flex justify-between items-center border-b border-white/5"><span><i class="fa-brands fa-html5 mr-1"></i> HTML</span></div>
+                <div class="flex-grow overflow-hidden relative">
+<textarea id="html-code">
+<div class="empty-space">
+  <div class="spinner-box"></div>
+  <h1 class="title">Sajak Kode</h1>
+  <p class="poetic-text">"Bebas bersajak di ruang hampa ini..."</p>
+</div>
+</textarea>
+                </div>
+            </div>
+
+            <div class="h-[250px] md:h-auto md:flex-1 flex flex-col min-h-0 border-b border-slate-700 relative">
+                <div class="bg-slate-800/50 px-3 py-1 text-xs font-mono font-bold text-blue-400 flex justify-between items-center border-b border-white/5"><span><i class="fa-brands fa-css3-alt mr-1"></i> CSS</span></div>
+                <div class="flex-grow overflow-hidden relative">
+<textarea id="css-code">
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff; /* Latar Putih Polos */
+  font-family: 'Inter', sans-serif;
+  color: #0f172a;
+}
+
+.empty-space { text-align: center; }
+
+/* Kotak Muter Sajak Kode */
+.spinner-box {
+  width: 60px;
+  height: 60px;
+  background: #2dd4bf; /* Warna Accent */
+  margin: 0 auto 24px;
+  border-radius: 12px;
+  animation: sajakSpin 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.title {
+  font-size: 2rem; font-weight: 800; margin: 0 0 8px;
+  font-family: 'Playfair Display', serif; letter-spacing: -0.02em;
+}
+.poetic-text {
+  font-size: 1.1rem; color: #64748b; font-style: italic;
+  font-family: 'Playfair Display', serif;
+}
+
+@keyframes sajakSpin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(0.8); border-radius: 50%; }
+  100% { transform: rotate(360deg) scale(1); }
+}
+</textarea>
+                </div>
+            </div>
+
+            <div class="h-[250px] md:h-auto md:flex-1 flex flex-col min-h-0 relative">
+                <div class="bg-slate-800/50 px-3 py-1 text-xs font-mono font-bold text-yellow-400 flex justify-between items-center border-b border-white/5"><span><i class="fa-brands fa-js mr-1"></i> JS</span></div>
+                <div class="flex-grow overflow-hidden relative">
+<textarea id="js-code">
+// Coba ketik ini untuk melihat console:
+// console.log("Halo dari ruang hampa!");
+console.log("Kanvas Kode siap digunakan.");
+</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full md:flex-1 bg-[#0f172a] relative flex flex-col min-h-[400px] md:min-h-0 border-t-4 border-sajak-accent md:border-t-0 md:border-l border-slate-700">
+            
+            <div id="preview-container" class="flex-1 relative flex flex-col h-full bg-white">
+                <iframe id="preview-frame" class="w-full h-full border-0 bg-white flex-1"></iframe>
+            </div>
+
+             <div id="console-container" class="flex-1 relative flex flex-col h-full bg-[#0f172a] hidden overflow-auto custom-scrollbar">
+                <div class="bg-slate-800 px-4 py-2 text-xs font-mono text-slate-400 border-b border-slate-700 sticky top-0">
+                    <i class="fa-solid fa-terminal mr-2"></i>Console Output
+                    <button onclick="clearConsole()" class="float-right hover:text-white"><i class="fa-solid fa-ban mr-1"></i>Clear</button>
+                </div>
+                <div id="console-output" class="p-2 text-slate-300">
+                    </div>
+            </div>
+            
+            <div class="h-10 bg-sajak-card border-t border-slate-700 flex text-sm font-mono shrink-0">
+                <button onclick="switchTab('preview')" id="tab-preview" class="flex-1 flex items-center justify-center gap-2 bg-[#0f172a] text-sajak-accent border-t-2 border-sajak-accent transition-colors">
+                    <i class="fa-solid fa-desktop"></i> Preview
+                </button>
+                <button onclick="switchTab('console')" id="tab-console" class="flex-1 flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800 border-t-2 border-transparent transition-colors relative">
+                    <i class="fa-solid fa-terminal"></i> Console
+                    <span id="console-badge" class="absolute top-2 right-1/3 w-2 h-2 bg-red-500 rounded-full hidden"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. SETUP EDITOR ---
+        const editorConfig = { theme: "dracula", lineNumbers: true, autoCloseTags: true, lineWrapping: true, tabSize: 2 };
+        const htmlEditor = CodeMirror.fromTextArea(document.getElementById("html-code"), { ...editorConfig, mode: "xml" });
+        const cssEditor = CodeMirror.fromTextArea(document.getElementById("css-code"), { ...editorConfig, mode: "css" });
+        const jsEditor = CodeMirror.fromTextArea(document.getElementById("js-code"), { ...editorConfig, mode: "javascript" });
+
+        // --- 2. FITUR RESIZER (PERBAIKAN IFRAME TRAP) ---
+        const resizer = document.getElementById('resizer');
+        const leftCol = document.getElementById('left-col');
+        const mainContainer = document.getElementById('main-container');
+        const previewFrame = document.getElementById('preview-frame'); // Referensi ke Iframe
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            leftCol.classList.add('resizing');
+            document.body.style.cursor = 'col-resize';
+            
+            // 🔥 PERBAIKAN UTAMA: Matikan interaksi iframe saat dragging
+            // Agar mouse tidak "jatuh" ke dalam iframe saat digeser cepat ke kanan
+            previewFrame.style.pointerEvents = 'none'; 
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            
+            // Mencegah seleksi teks saat digeser
+            e.preventDefault();
+
+            const containerWidth = mainContainer.offsetWidth;
+            const newLeftWidth = (e.clientX / containerWidth) * 100;
+
+            // Batasi minimal 10% dan maksimal 90%
+            if(newLeftWidth > 10 && newLeftWidth < 90) {
+                leftCol.style.width = `${newLeftWidth}%`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if(isResizing) {
+                isResizing = false;
+                leftCol.classList.remove('resizing');
+                document.body.style.cursor = '';
+                
+                // 🔥 PERBAIKAN UTAMA: Nyalakan lagi interaksi iframe setelah selesai
+                previewFrame.style.pointerEvents = 'auto';
+            }
+        });
+
+
+        // --- 3. FITUR TABS (PREVIEW / CONSOLE) ---
+        let activeTab = 'preview';
+        const consoleBadge = document.getElementById('console-badge');
+
+        function switchTab(tab) {
+            activeTab = tab;
+            const previewBtn = document.getElementById('tab-preview');
+            const consoleBtn = document.getElementById('tab-console');
+            const previewCont = document.getElementById('preview-container');
+            const consoleCont = document.getElementById('console-container');
+
+            if(tab === 'preview') {
+                previewCont.classList.remove('hidden');
+                consoleCont.classList.add('hidden');
+                previewBtn.className = "flex-1 flex items-center justify-center gap-2 bg-[#0f172a] text-sajak-accent border-t-2 border-sajak-accent transition-colors";
+                consoleBtn.className = "flex-1 flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800 border-t-2 border-transparent transition-colors relative";
+            } else {
+                previewCont.classList.add('hidden');
+                consoleCont.classList.remove('hidden');
+                consoleBtn.className = "flex-1 flex items-center justify-center gap-2 bg-[#0f172a] text-sajak-accent border-t-2 border-sajak-accent transition-colors relative";
+                previewBtn.className = "flex-1 flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800 border-t-2 border-transparent transition-colors";
+                consoleBadge.classList.add('hidden');
+            }
+        }
+
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = '';
+        }
+
+        function appendToConsole(message, type = 'log') {
+            const outputDiv = document.getElementById('console-output');
+            const logEl = document.createElement('div');
+            const escapedMessage = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            logEl.className = `console-log ${type === 'error' ? 'console-error' : ''}`;
+            logEl.innerHTML = `<span class="text-slate-500 mr-2">›</span>${escapedMessage}`;
+            outputDiv.appendChild(logEl);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+
+            if(activeTab === 'preview') {
+                consoleBadge.classList.remove('hidden');
+            }
+        }
+
+
+        // --- 4. RUN CODE & INTERCEPT CONSOLE ---
+        function runCode(manualClick = false) {
+            const html = htmlEditor.getValue();
+            const css = `<style>${cssEditor.getValue()}</style>`;
+            const js = jsEditor.getValue();
+            
+            const frame = document.getElementById("preview-frame");
+            const frameDoc = frame.contentDocument || frame.contentWindow.document;
+
+            frameDoc.open();
+            frameDoc.write(html + css);
+
+            const consoleInterceptor = `
+                <script>
+                    const originalConsole = window.console;
+                    window.console = {
+                        log: function(...args) {
+                            const output = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ');
+                            parent.appendToConsole(output, 'log');
+                        },
+                        error: function(...args) {
+                             const output = args.map(arg => String(arg)).join(' ');
+                             parent.appendToConsole(output, 'error');
+                        }
+                    };
+                <\/script>
+            `;
+            frameDoc.write(consoleInterceptor);
+            frameDoc.write(`<script>try { ${js} } catch(e) { console.error(e); }<\/script>`);
+            frameDoc.close();
+
+            if(manualClick) {
+                const btn = document.querySelector('button[onclick="runCode(true)"]');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> <span class="hidden sm:inline">OK</span>';
+                setTimeout(() => btn.innerHTML = originalHtml, 1000);
+            }
+            document.getElementById('save-status').innerHTML = '<i class="fa-solid fa-check-circle text-sajak-accent"></i> Saved';
+        }
+
+        let timeout;
+        function autoUpdate() {
+            document.getElementById('save-status').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-slate-500"></i> Typing...';
+            clearTimeout(timeout);
+            timeout = setTimeout(runCode, 1000);
+        }
+
+        htmlEditor.on("change", autoUpdate);
+        cssEditor.on("change", autoUpdate);
+        jsEditor.on("change", autoUpdate);
+
+        runCode();
+    </script>
+</body>
+</html>

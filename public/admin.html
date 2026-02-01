@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
@@ -8,9 +8,18 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
       href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+
     <script>
       tailwind.config = {
         theme: {
@@ -33,18 +42,22 @@
   <body
     class="bg-sajak-dark text-slate-300 font-sans flex flex-col min-h-screen"
   >
-    <script src="layout.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
     <script>
-      // Cek Keamanan Dulu
+      // Cek Keamanan
       const token = localStorage.getItem("adminToken");
       if (!token) window.location.href = "/login.html";
 
-      window.onload = function () {
-        const app = document.getElementById("app");
+      // Variable Global untuk Warna
+      let currentColors = [];
 
+      window.onload = function () {
+        const app = document.body; // Langsung append ke body atau wrapper
+
+        // Render Layout Manual (Karena admin.html biasanya file mandiri)
         app.innerHTML = `
-            <div class="max-w-4xl mx-auto">
+            <div class="max-w-4xl mx-auto p-6">
                 <div class="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
                     <h2 class="text-2xl font-serif font-bold text-white">Dashboard Penulis</h2>
                     <button id="logoutBtn" class="text-xs font-mono text-red-400 hover:text-red-300 border border-red-900 bg-red-900/20 px-4 py-2 rounded transition">LOGOUT</button>
@@ -64,18 +77,31 @@
                     </div>
 
                     <div>
-    <label class="block text-xs font-mono text-sajak-accent mb-2">UPLOAD GAMBAR TARGET</label>
-    <div class="flex gap-2">
-        <input type="file" id="imageInput" accept="image/*" class="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded text-slate-400 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-sajak-accent file:text-sajak-dark hover:file:bg-teal-300">
-        
-        <input type="hidden" id="finalImageUrl">
-    </div>
-    <img id="preview" class="h-20 mt-2 rounded border border-slate-700 hidden object-cover">
-</div>
+                        <label class="block text-xs font-mono text-sajak-accent mb-2">UPLOAD GAMBAR TARGET</label>
+                        <div class="flex gap-2">
+                            <input type="file" id="imageInput" accept="image/*" class="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded text-slate-400 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-sajak-accent file:text-sajak-dark hover:file:bg-teal-300">
+                            <input type="hidden" id="finalImageUrl">
+                        </div>
+                        <img id="preview" class="h-20 mt-2 rounded border border-slate-700 hidden object-cover">
+                    </div>
 
                     <div>
-                        <label class="block text-xs font-mono text-sajak-accent mb-2">DESKRIPSI SINGKAT</label>
-                        <textarea id="description" class="w-full h-20 px-4 py-3 bg-slate-900 border border-slate-600 rounded text-slate-300 font-sans text-sm focus:border-sajak-accent focus:outline-none" placeholder="Ceritakan sedikit tentang teknik yang dipakai..." required></textarea>
+                        <label class="block text-xs font-mono text-sajak-accent mb-2">PALET WARNA (Hex Code)</label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" id="colorInput" class="w-1/3 px-4 py-2 bg-slate-900 border border-slate-600 rounded text-white focus:border-sajak-accent focus:outline-none font-mono" placeholder="#191919">
+                            <button type="button" onclick="addColorFromInput()" class="bg-slate-700 hover:bg-sajak-accent hover:text-sajak-dark text-white px-4 rounded border border-slate-600 transition">
+                                <i class="fa-solid fa-plus"></i> Tambah
+                            </button>
+                        </div>
+                        <div id="colorChipsContainer" class="flex flex-wrap gap-2 min-h-[40px] p-2 bg-slate-900/50 rounded border border-slate-700/50 items-center">
+                            <span class="text-xs text-slate-500 italic" id="emptyColorMsg">Belum ada warna.</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-slate-400 mb-2">Deskripsi</label>
+                        <div id="editor-container" class="bg-slate-800 text-slate-300 h-40 rounded"></div>
+                        <input type="hidden" id="description" name="description">
                     </div>
 
                     <div>
@@ -87,87 +113,171 @@
                         <i class="fa-solid fa-save mr-2"></i> SIMPAN SOLUSI
                     </button>
                 </form>
-                <div class="mt-10">
-    <h3 class="text-xl font-bold text-white mb-4">Daftar Solusi Aktif</h3>
-    <div id="solutionsList" class="space-y-4">
-        </div>
-</div>
+
+                <div class="mt-10 mb-20">
+                    <h3 class="text-xl font-bold text-white mb-4">Daftar Solusi Aktif</h3>
+                    <div id="solutionsList" class="space-y-4"></div>
+                </div>
             </div>
         `;
 
+        // --- INISIALISASI QUILL ---
+        var quill = new Quill("#editor-container", {
+          theme: "snow",
+          placeholder: "Tulis deskripsi dengan gaya...",
+          modules: {
+            toolbar: [
+              ["bold", "italic", "underline"],
+              [{ list: "ordered" }, { list: "bullet" }],
+              ["clean"],
+            ],
+          },
+        });
+
         let editModeId = null;
 
-        // 1. Fungsi Fetch & Render Daftar
+        // --- FUNGSI WARNA (BARU) ---
+
+        // 1. Tambah Warna ke Array
+        window.addColorFromInput = () => {
+          const input = document.getElementById("colorInput");
+          let color = input.value.trim();
+
+          if (!color) return;
+          if (!color.startsWith("#")) color = "#" + color; // Auto tambah #
+
+          // Validasi sederhana Hex Code
+          if (
+            !/^#[0-9A-F]{6}$/i.test(color) &&
+            !/^#[0-9A-F]{3}$/i.test(color)
+          ) {
+            alert(
+              "Kode warna tidak valid! Gunakan format Hex (contoh: #FF0000)",
+            );
+            return;
+          }
+
+          // Cek duplikat
+          if (!currentColors.includes(color)) {
+            currentColors.push(color);
+            renderColorChips();
+            input.value = ""; // Reset input
+            input.focus();
+          } else {
+            alert("Warna sudah ada!");
+          }
+        };
+
+        // 2. Render Tampilan Chips
+        window.renderColorChips = () => {
+          const container = document.getElementById("colorChipsContainer");
+
+          // 1. Bersihkan Container
+          container.innerHTML = "";
+
+          // 2. Jika Kosong, Masukkan Pesan Default (Pakai String HTML saja biar aman)
+          if (currentColors.length === 0) {
+            container.innerHTML =
+              '<span class="text-xs text-slate-500 italic" id="emptyColorMsg">Belum ada warna.</span>';
+            return;
+          }
+
+          // 3. Jika Ada Warna, Render Loop
+          currentColors.forEach((color, index) => {
+            const chip = document.createElement("div");
+            chip.className =
+              "flex items-center gap-2 px-3 py-1 rounded bg-slate-800 border border-slate-600 text-xs font-mono text-white animate-fade-in";
+            chip.innerHTML = `
+            <div class="w-3 h-3 rounded-full border border-white/20" style="background-color: ${color};"></div>
+            <span>${color}</span>
+            <button onclick="removeColor(${index})" class="text-slate-400 hover:text-red-400 ml-1 transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        `;
+            container.appendChild(chip);
+          });
+        };
+
+        // 3. Hapus Warna
+        window.removeColor = (index) => {
+          currentColors.splice(index, 1);
+          renderColorChips();
+        };
+
+        // --- FUNGSI CRUD STANDAR ---
+
         async function loadSolutions() {
           const res = await fetch("/api/solutions");
           const data = await res.json();
           const list = document.getElementById("solutionsList");
           list.innerHTML = "";
+          // Sort biar rapi
+          data.sort((a, b) => b.targetNumber - a.targetNumber);
 
           data.forEach((item) => {
             list.innerHTML += `
-            <div class="bg-slate-800 p-4 rounded border border-slate-600 flex justify-between items-center">
-                <div>
-                    <span class="text-sajak-accent font-bold">#${item.targetNumber}</span>
-                    <span class="text-white ml-2">${item.title}</span>
+            <div class="bg-slate-800 p-4 rounded border border-slate-600 flex justify-between items-center hover:border-slate-500 transition">
+                <div class="flex items-center gap-4">
+                    <img src="${item.image}" class="w-10 h-10 rounded object-cover bg-slate-700">
+                    <div>
+                        <div class="text-sajak-accent font-bold font-mono">#${item.targetNumber}</div>
+                        <div class="text-white text-sm">${item.title}</div>
+                    </div>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="editItem('${item._id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-500">Edit</button>
-                    <button onclick="deleteItem('${item._id}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-500">Hapus</button>
+                    <button onclick="editItem('${item._id}')" class="bg-blue-600/20 border border-blue-600 text-blue-400 px-3 py-1 rounded text-xs hover:bg-blue-600 hover:text-white transition">Edit</button>
+                    <button onclick="deleteItem('${item._id}')" class="bg-red-600/20 border border-red-600 text-red-400 px-3 py-1 rounded text-xs hover:bg-red-600 hover:text-white transition">Hapus</button>
                 </div>
             </div>
         `;
           });
         }
 
-        // 2. Fungsi Hapus
         window.deleteItem = async (id) => {
           if (!confirm("Yakin mau hapus?")) return;
           await fetch(`/api/solutions/${id}`, {
             method: "DELETE",
             headers: { Authorization: token },
           });
-          loadSolutions(); // Refresh daftar
+          loadSolutions();
         };
 
-        // 3. Fungsi Persiapan Edit (Isi Form)
         window.editItem = async (id) => {
-          // Ambil data detail (bisa fetch ulang atau cari dari array yang ada)
           const res = await fetch("/api/solutions");
           const data = await res.json();
           const item = data.find((i) => i._id === id);
 
-          // Isi Form
           document.getElementById("targetNumber").value = item.targetNumber;
           document.getElementById("title").value = item.title;
-          document.getElementById("finalImageUrl").value = item.image; // URL gambar
-          document.getElementById("description").value = item.description;
+          document.getElementById("finalImageUrl").value = item.image;
+          quill.root.innerHTML = item.description;
           document.getElementById("code").value = item.code;
 
-          // Tampilkan preview gambar
+          // Preview Gambar
           const img = document.getElementById("preview");
           img.src = item.image;
           img.classList.remove("hidden");
 
-          // Ubah Mode Tombol
+          // Load Warna ke Array Global
+          currentColors = item.colors || []; // Pastikan ada fallback array kosong
+          renderColorChips();
+
           editModeId = id;
           const btn = document
             .getElementById("adminForm")
-            .querySelector("button");
-          btn.innerHTML = "🔄 UPDATE SOLUSI";
+            .querySelector("button[type=submit]");
+          btn.innerHTML = '<i class="fa-solid fa-rotate"></i> UPDATE SOLUSI';
           btn.classList.replace("bg-slate-700", "bg-blue-600");
 
-          // Scroll ke atas
           window.scrollTo(0, 0);
         };
 
-        // Logic Logout (Tetap sama)
         document.getElementById("logoutBtn").addEventListener("click", () => {
           localStorage.removeItem("adminToken");
           window.location.href = "/";
         });
 
-        // LOGIC PREVIEW GAMBAR SAAT DIPILIH
+        // Upload Preview Logic
         document
           .getElementById("imageInput")
           .addEventListener("change", function (e) {
@@ -183,50 +293,47 @@
             }
           });
 
-        // LOGIC SUBMIT BARU (Upload dulu -> Baru Simpan Data)
+        // --- SUBMIT FORM ---
         document
           .getElementById("adminForm")
           .addEventListener("submit", async function (e) {
             e.preventDefault();
-            const btn = this.querySelector("button");
+            const btn = this.querySelector("button[type=submit]");
             const originalText = btn.innerHTML;
             btn.innerHTML =
-              '<i class="fa-solid fa-spinner fa-spin"></i> Mengupload...';
+              '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
             btn.disabled = true;
 
             try {
-              // 1. PROSES UPLOAD GAMBAR (Jika ada file dipilih)
+              // 1. Upload Gambar (Jika ada file baru)
               const fileInput = document.getElementById("imageInput");
-              let imageUrl = document.getElementById("finalImageUrl").value; // Default kosong/lama
+              let imageUrl = document.getElementById("finalImageUrl").value;
 
               if (fileInput.files.length > 0) {
                 const formData = new FormData();
                 formData.append("imageFile", fileInput.files[0]);
-
                 const uploadRes = await fetch("/api/upload", {
                   method: "POST",
-                  body: formData, // Header Content-Type otomatis diatur browser
+                  body: formData,
                 });
-
                 if (!uploadRes.ok) throw new Error("Gagal upload gambar");
-
                 const uploadData = await uploadRes.json();
-                imageUrl = uploadData.url; // Kita dapat URL: /images/uploads/123-nama.png
-              } else {
-                // Jika tidak upload file, pastikan user isi manual atau error
-                if (!imageUrl) {
-                  // Opsional: Bolehkan pakai URL eksternal jika mau, atau throw error
-                  // throw new Error('Harap pilih gambar!');
-                }
+                imageUrl = uploadData.url;
               }
 
-              // 2. SIMPAN DATA SOLUSI KE DATABASE
+              // 2. Kumpulkan Data (Termasuk Colors)
+              var description = document.querySelector(
+                "input[name=description]",
+              );
+              description.value = quill.root.innerHTML;
+
               const data = {
                 targetNumber: document.getElementById("targetNumber").value,
                 title: document.getElementById("title").value,
-                image: imageUrl, // Pakai URL hasil upload tadi
-                description: document.getElementById("description").value,
+                image: imageUrl,
+                description: description.value,
                 code: document.getElementById("code").value,
+                colors: currentColors, // <--- KIRIM ARRAY WARNA
               };
 
               const method = editModeId ? "PUT" : "POST";
@@ -247,12 +354,16 @@
                 alert("✅ Berhasil!");
                 this.reset();
                 document.getElementById("preview").classList.add("hidden");
-                loadSolutions(); // Refresh daftar
+                quill.root.innerHTML = "";
 
-                // Reset Mode ke Input Baru
+                // Reset Warna
+                currentColors = [];
+                renderColorChips();
+
+                loadSolutions();
                 editModeId = null;
-                const btn = this.querySelector("button");
-                btn.innerHTML = "💾 SIMPAN SOLUSI";
+                btn.innerHTML =
+                  '<i class="fa-solid fa-save mr-2"></i> SIMPAN SOLUSI';
                 btn.classList.replace("bg-blue-600", "bg-slate-700");
               }
             } catch (error) {
@@ -264,7 +375,7 @@
             }
           });
 
-          loadSolutions();
+        loadSolutions();
       };
     </script>
   </body>

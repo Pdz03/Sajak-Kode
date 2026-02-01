@@ -64,8 +64,9 @@ const solutionSchema = new mongoose.Schema({
   image: String,
   description: String,
   code: String,
-  likes: { type: Number, default: 0 }, // Fitur Like
-  comments: [{                         // Fitur Komentar Array
+  colors: [String], // <--- TAMBAHKAN INI (Array warna hex)
+  likes: { type: Number, default: 0 },
+  comments: [{
     username: String,
     text: String,
     date: { type: Date, default: Date.now }
